@@ -17,6 +17,8 @@ class TaskResource extends Controller {
     }
 
     todoList.addOne(id -> Todo(id, todo.detail))
+
+    response.created(s"created $id")
   }
 
   get("/todo") { _: Request => todoList.values.toList }
