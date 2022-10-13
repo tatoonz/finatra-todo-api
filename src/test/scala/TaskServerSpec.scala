@@ -4,7 +4,7 @@ import com.twitter.finagle.http.Status
 
 class TaskServerSpec extends FeatureTest {
 
-  override protected def server: EmbeddedHttpServer = new EmbeddedHttpServer(
+  override val server: EmbeddedHttpServer = new EmbeddedHttpServer(
     twitterServer = new TaskServer
   )
 
@@ -23,6 +23,33 @@ class TaskServerSpec extends FeatureTest {
       """.stripMargin,
       andExpect = Status.Created,
       withJsonBody = "created 0"
+    )
+  }
+
+  test(
+    "Move item todoing should return status created and json body is 'Item was moved to doing'"
+  ) {
+    server.httpPost(
+      path = "/todo/next",
+      postBody = """
+      |{
+      |  "id": 0,
+      |  "detail": "buy banana"
+      |}
+      """.stripMargin,
+      andExpect = Status.Created,
+      withJsonBody = "Item was moved to doing"
+    )
+  }
+
+  test("After move item to doing, todo list should be empty") {
+    server.httpGet(path = "/todo", withJsonBody = "[]")
+  }
+
+  test("After move item to doing, doing list should contain 1 item") {
+    server.httpGet(
+      path = "/doing",
+      withJsonBody = """[{"id":0, "detail": "buy banana"}]"""
     )
   }
 }
